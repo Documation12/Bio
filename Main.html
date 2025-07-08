@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<head>
+    <title></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="Main.css">
+</head>
+<body>
+    <div class="clock" id="clock"></div>
+    <canvas id="particles-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;"></canvas>
+    <div class="PageCenter">
+        <div class="Container">
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark/light mode">
+                <i id="theme-icon" class="fas fa-moon"></i>
+            </button>
+            <h1>Dripyked</h1>
+            <p class="AboutMe" id="about-me"></p>
+            <ul class="ContactList">
+                <li>
+                    <i class="fab fa-discord"></i>Discord:
+                    <a href="https://discord.com/users/1141349369954717706" target="_blank">@Dripyked</a>
+                </li>
+                <li>
+                    <i class="fab fa-github"></i>GitHub:
+                    <a href="https://github.com/Documation12" target="_blank">github.com/Documation12</a>
+                </li>
+            </ul>
+            <div class="music-player" id="music-player">
+                <button id="play-pause" aria-label="Play/Pause">
+                    <i class="fas fa-play"></i>
+                </button>
+                <span class="song-title">Timeless</span>
+                <span class="audio-time" id="audio-current">0:00</span>
+                <div class="progress-container" id="progress-container">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <span class="audio-time" id="audio-duration">0:00</span>
+                <audio id="audio" src="Song.mp3" loop></audio>
+            </div>
+        </div>
+    </div>
+    <script>
+        const AboutMe = "Hi! I'm Dripyked, a developer passionate about JavaScript, Lua, Luau, and Python. I enjoy reverse engineering obfuscated code.";
+        const Element = document.getElementById('about-me');
+        let i = 0;
+        function Type() {
+            if (i < AboutMe.length) {
+                Element.textContent += AboutMe.charAt(i);
+                i++;
+                setTimeout(Type, 22);
+            }
+        }
+        window.addEventListener('DOMContentLoaded', Type);
+
+        const ToggleBtn = document.getElementById('theme-toggle');
+        const Icon = document.getElementById('theme-icon');
+        const Prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        function SetTheme(Dark) {
+            if (Dark) {
+                document.body.classList.remove('light');
+                document.body.classList.add('dark');
+                Icon.classList.remove('fa-sun');
+                Icon.classList.add('fa-moon');
+            } else {
+                document.body.classList.remove('dark');
+                document.body.classList.add('light');
+                Icon.classList.remove('fa-moon');
+                Icon.classList.add('fa-sun');
+            }
+        }
+        let DarkMode = localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === null && Prefers);
+        SetTheme(DarkMode);
+        ToggleBtn.addEventListener('click', () => {
+            DarkMode = ! DarkMode;
+            SetTheme(DarkMode);
+            localStorage.setItem('theme', DarkMode ? 'dark' : 'light');
+        });
+
+        const Canvas = document.getElementById('particles-bg');
+        const Ctx = Canvas.getContext('2d');
+
+        let Particles = [];
+        const ParticleCount = 60;
+
+        function ResizeCanvas() {
+            Canvas.width = window.innerWidth;
+            Canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', ResizeCanvas);
+        ResizeCanvas();
+
+        function RandomColor() {
+            return getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#a259ff';
+        }
+
+        function CreateParticles() {
+            Particles = [];
+            for (let I = 0; I < ParticleCount; I++) {
+                Particles.push({
+                    x: Math.random() * Canvas.width,
+                    y: Math.random() * Canvas.height,
+                    r: Math.random() * 1.8 + 1.2,
+                    dx: (Math.random() - 0.5) * 0.7,
+                    dy: (Math.random() - 0.5) * 0.7,
+                    color: RandomColor()
+                });
+            }
+        }
+        CreateParticles();
+
+        function DrawParticles() {
+            Ctx.clearRect(0, 0, Canvas.width, Canvas.height);
+            for (const P of Particles) {
+                Ctx.beginPath();
+                Ctx.arc(P.x, P.y, P.r, 0, 2 * Math.PI);
+                Ctx.fillStyle = P.color;
+                Ctx.globalAlpha = 0.5;
+                Ctx.fill();
+                Ctx.globalAlpha = 1;
+            }
+        }
+
+        function UpdateParticles() {
+            for (const P of Particles) {
+                P.x += P.dx;
+                P.y += P.dy;
+
+                if (P.x < 0 || P.x > Canvas.width) 
+                    P.dx *= -1;
+                
+
+                if (P.y < 0 || P.y > Canvas.height) 
+                    P.dy *= -1;
+                
+
+            }
+        }
+
+        function AnimateParticles() {
+            UpdateParticles();
+            DrawParticles();
+            requestAnimationFrame(AnimateParticles);
+        }
+        AnimateParticles();
+
+        window.addEventListener('resize', () => {
+            ResizeCanvas();
+            CreateParticles();
+        });
+
+        const Observer = new MutationObserver(() => {
+            for (const P of Particles) {
+                P.color = RandomColor();
+            }
+        });
+
+        Observer.observe(document.body, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+
+        function UpdateClock() {
+            const Clock = document.getElementById('clock');
+            const Now = new Date();
+            const H = String(Now.getHours()).padStart(2, '0');
+            const M = String(Now.getMinutes()).padStart(2, '0');
+            const S = String(Now.getSeconds()).padStart(2, '0');
+            Clock.textContent = `${H}:${M}:${S}`;
+        }
+        setInterval(UpdateClock, 1000);
+        UpdateClock();
+
+        const Audio = document.getElementById('audio');
+        const PlayPauseBtn = document.getElementById('play-pause');
+        const PlayPauseIcon = PlayPauseBtn.querySelector('i');
+        const ProgressContainer = document.getElementById('progress-container');
+        const Progress = document.getElementById('progress');
+        const AudioCurrent = document.getElementById('audio-current');
+        const AudioDuration = document.getElementById('audio-duration');
+        let IsPlaying = false;
+        function FormatTime(Secs) {
+            const Min = Math.floor(Secs / 60);
+            const Sec = Math.floor(Secs % 60);
+            return `${Min}:${
+                Sec.toString().padStart(2, '0')
+            }`;
+        }
+        PlayPauseBtn.addEventListener('click', () => {
+            if (Audio.paused) {
+                Audio.play();
+            } else {
+                Audio.pause();
+            }
+        });
+        Audio.addEventListener('play', () => {
+            IsPlaying = true;
+            PlayPauseIcon.classList.remove('fa-play');
+            PlayPauseIcon.classList.add('fa-pause');
+        });
+        Audio.addEventListener('pause', () => {
+            IsPlaying = false;
+            PlayPauseIcon.classList.remove('fa-pause');
+            PlayPauseIcon.classList.add('fa-play');
+        });
+        Audio.addEventListener('timeupdate', () => {
+            const Percent = (Audio.currentTime / Audio.duration) * 100;
+            Progress.style.width = Percent + '%';
+            AudioCurrent.textContent = FormatTime(Audio.currentTime);
+        });
+        Audio.addEventListener('loadedmetadata', () => {
+            AudioDuration.textContent = FormatTime(Audio.duration);
+        });
+        ProgressContainer.addEventListener('click', (E) => {
+            const Rect = ProgressContainer.getBoundingClientRect();
+            const X = E.clientX - Rect.left;
+            const Percent = X / Rect.width;
+            Audio.currentTime = Percent * Audio.duration;
+        });
+
+        const TitleText = '@dripyked';
+        let TitleIndex = 0;
+        function TypeTitle() {
+            if (TitleIndex <= TitleText.length) {
+                document.title = TitleText.slice(0, TitleIndex);
+                TitleIndex++;
+                setTimeout(TypeTitle, 100);
+            }
+        }
+        window.addEventListener('DOMContentLoaded', TypeTitle);
+    </script>
+</body></html>
