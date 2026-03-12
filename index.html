@@ -1,231 +1,594 @@
+
 <!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <title></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="Main.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0a0a0b;
+      --surface: #111113;
+      --surface2: #161618;
+      --border: #1e1e21;
+      --border2: #2a2a2e;
+      --text: #e8e8ec;
+      --muted: #6b6b75;
+      --accent: #c084fc;
+      --accent2: #818cf8;
+      --glow: rgba(192, 132, 252, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    input,
+    textarea,
+    code,
+    pre {
+      user-select: text;
+    }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.022;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* Grid lines background */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .clock {
+      position: fixed;
+      top: 1.4rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .theme-btn {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, color 0.2s;
+      z-index: 10;
+    }
+
+    .theme-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 2.2rem 2.2rem 2rem;
+      position: relative;
+      animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* Corner accent lines */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      width: 60px;
+      height: 60px;
+      border-top: 2px solid var(--accent);
+      border-left: 2px solid var(--accent);
+      border-radius: 20px 0 0 0;
+      opacity: 0.6;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 40px;
+      height: 40px;
+      border-bottom: 2px solid var(--accent2);
+      border-right: 2px solid var(--accent2);
+      border-radius: 0 0 20px 0;
+      opacity: 0.4;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(28px) scale(0.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.6rem;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border2);
+      margin-bottom: 1.4rem;
+    }
+
+    .about {
+      font-size: 0.92rem;
+      color: #a0a0aa;
+      line-height: 1.7;
+      margin-bottom: 1.8rem;
+      min-height: 3.2em;
+      font-weight: 300;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background: var(--accent);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+      margin-left: 1px;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0
+      }
+    }
+
+    .links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .link-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.65rem 0.9rem;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.88rem;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .link-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .link-item:hover {
+      border-color: var(--border2);
+      background: #1a1a1c;
+      transform: translateX(3px);
+    }
+
+    .link-item:hover::before {
+      opacity: 1;
+    }
+
+    .link-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: rgba(192, 132, 252, 0.08);
+      border: 1px solid rgba(192, 132, 252, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .link-label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.05rem;
+      flex: 1;
+    }
+
+    .link-label span:first-child {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .link-label span:last-child {
+      color: var(--text);
+      font-size: 0.88rem;
+    }
+
+    .link-arrow {
+      color: var(--muted);
+      font-size: 0.7rem;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .link-item:hover .link-arrow {
+      color: var(--accent);
+      transform: translateX(2px);
+    }
+
+    /* Player */
+    .player {
+      position: fixed;
+      bottom: 1.8rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.55rem 1rem 0.55rem 0.7rem;
+      z-index: 100;
+      min-width: 260px;
+      max-width: 92vw;
+      animation: slideUp 0.6s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    .play-btn {
+      background: rgba(192, 132, 252, 0.1);
+      border: 1px solid rgba(192, 132, 252, 0.2);
+      color: var(--accent);
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.72rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover {
+      background: rgba(192, 132, 252, 0.18);
+      border-color: rgba(192, 132, 252, 0.35);
+    }
+
+    .song-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.05rem;
+      min-width: 0;
+    }
+
+    .song-name {
+      font-size: 0.78rem;
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90px;
+    }
+
+    .song-sub {
+      font-size: 0.65rem;
+      color: var(--muted);
+    }
+
+    .prog-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 60px;
+    }
+
+    .prog-bar {
+      height: 3px;
+      background: var(--border2);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      width: 0%;
+      border-radius: 2px;
+      transition: width 0.2s linear;
+    }
+
+    .prog-times {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .prog-times span {
+      font-size: 0.6rem;
+      font-family: 'Space Mono', monospace;
+      color: var(--muted);
+    }
+
+    audio {
+      display: none;
+    }
+
+    /* Light mode */
+    body.light {
+      --bg: #f2f2f5;
+      --surface: #ffffff;
+      --surface2: #f7f7fa;
+      --border: #e2e2e8;
+      --border2: #d0d0d8;
+      --text: #0f0f12;
+      --muted: #888892;
+      --accent: #7c3aed;
+      --accent2: #4f46e5;
+      --glow: rgba(124, 58, 237, 0.08);
+    }
+
+    body.light::after {
+      opacity: 0.12;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 1.6rem 1.2rem 1.4rem;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      .player {
+        min-width: 220px;
+      }
+    }
+  </style>
 </head>
-<body>
-    <div class="clock" id="clock"></div>
-    <canvas id="particles-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;"></canvas>
-    <div class="PageCenter">
-        <div class="Container">
-            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark/light mode">
-                <i id="theme-icon" class="fas fa-moon"></i>
-            </button>
-            <h1>Dripyked</h1>
-            <p class="AboutMe" id="about-me"></p>
-            <ul class="ContactList">
-                <li>
-                    <i class="fab fa-discord"></i>Discord:
-                    <a href="https://discord.com/users/1141349369954717706" target="_blank">@Dripyked</a>
-                </li>
-                <li>
-                    <i class="fab fa-github"></i>GitHub:
-                    <a href="https://github.com/Documation12" target="_blank">github.com/Documation12</a>
-                </li>
-            </ul>
-        </div>
+
+<body class="dark">
+
+  <div class="clock" id="clock"></div>
+
+  <div class="wrap">
+    <div class="card">
+      <button class="theme-btn" id="theme-btn" aria-label="toggle theme">
+        <i id="theme-icon" class="fas fa-moon"></i>
+      </button>
+
+      <!-- <div class="tag"></div> -->
+      <h1><span>Drip</span>yked</h1>
+      <div class="subtitle">developer &amp; pentester</div>
+
+      <div class="divider"></div>
+
+      <p class="about" id="about"></p>
+
+      <div class="links">
+        <a href="https://discord.com/users/1141349369954717706" target="_blank" class="link-item">
+          <div class="link-icon"><i class="fab fa-discord"></i></div>
+          <div class="link-label">
+            <span>Discord</span>
+            <span>@Dripyked</span>
+          </div>
+          <i class="fas fa-arrow-right link-arrow"></i>
+        </a>
+        <a href="https://github.com/Documation12" target="_blank" class="link-item">
+          <div class="link-icon"><i class="fab fa-github"></i></div>
+          <div class="link-label">
+            <span>GitHub</span>
+            <span>Documation12</span>
+          </div>
+          <i class="fas fa-arrow-right link-arrow"></i>
+        </a>
+      </div>
     </div>
-    <div class="music-player" id="music-player">
-        <button id="play-pause" aria-label="Play/Pause">
-            <i class="fas fa-play"></i>
-        </button>
-        <span class="song-title">Timeless</span>
-        <span class="audio-time" id="audio-current">0:00</span>
-        <div class="progress-container" id="progress-container">
-            <div class="progress" id="progress"></div>
-        </div>
-        <span class="audio-time" id="audio-duration">0:00</span>
-        <audio id="audio" src="Song.mp3" loop></audio>
+  </div>
+
+  <div class="player">
+    <button class="play-btn" id="play-btn" aria-label="play/pause">
+      <i class="fas fa-play" id="play-icon"></i>
+    </button>
+    <div class="song-info">
+      <div class="song-name">Timeless</div>
+      <div class="song-sub">now playing</div>
     </div>
-    <script>
-        const AboutMe = "Hi! I'm Dripyked, a developer passionate about JavaScript, Lua, Luau, and Python. I enjoy reverse engineering obfuscated code.";
-        const Element = document.getElementById('about-me');
-        let i = 0;
-        function Type() {
-            if (i < AboutMe.length) {
-                Element.textContent += AboutMe.charAt(i);
-                i++;
-                setTimeout(Type, 22);
-            }
-        }
-        window.addEventListener('DOMContentLoaded', Type);
+    <div class="prog-wrap">
+      <div class="prog-bar" id="prog-bar">
+        <div class="prog-fill" id="prog-fill"></div>
+      </div>
+      <div class="prog-times">
+        <span id="time-cur">0:00</span>
+        <span id="time-dur">0:00</span>
+      </div>
+    </div>
+    <audio id="audio" src="Song.mp3" loop></audio>
+  </div>
 
-        const ToggleBtn = document.getElementById('theme-toggle');
-        const Icon = document.getElementById('theme-icon');
-        const Prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        function SetTheme(Dark) {
-            if (Dark) {
-                document.body.classList.remove('light');
-                document.body.classList.add('dark');
-                Icon.classList.remove('fa-sun');
-                Icon.classList.add('fa-moon');
-            } else {
-                document.body.classList.remove('dark');
-                document.body.classList.add('light');
-                Icon.classList.remove('fa-moon');
-                Icon.classList.add('fa-sun');
-            }
-        }
-        let DarkMode = localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === null && Prefers);
-        SetTheme(DarkMode);
-        ToggleBtn.addEventListener('click', () => {
-            DarkMode = ! DarkMode;
-            SetTheme(DarkMode);
-            localStorage.setItem('theme', DarkMode ? 'dark' : 'light');
-        });
+  <script>
+    // Typing
+    const text = "Hi! I'm Dripyked, a developer working with JavaScript, Luau, and Python. Learning C# and game hacking. I enjoy reverse engineering and pentesting authentication systems.";
+    const el = document.getElementById('about');
+    let i = 0;
+    function type() {
+      if (i <= text.length) {
+        el.innerHTML = text.slice(0, i) + '<span class="cursor"></span>';
+        i++;
+        setTimeout(type, i === text.length ? 0 : 21);
+      }
+    }
+    window.addEventListener('DOMContentLoaded', type);
 
-        const Canvas = document.getElementById('particles-bg');
-        const Ctx = Canvas.getContext('2d');
+    // Clock
+    function tick() {
+      const n = new Date();
+      const pad = v => String(v).padStart(2, '0');
+      document.getElementById('clock').textContent =
+        `${pad(n.getHours())} : ${pad(n.getMinutes())} : ${pad(n.getSeconds())}`;
+    }
+    setInterval(tick, 1000); tick();
 
-        let Particles = [];
-        const ParticleCount = 60;
+    // Theme
+    const btn = document.getElementById('theme-btn');
+    const icon = document.getElementById('theme-icon');
+    let dark = localStorage.getItem('theme') !== 'light';
+    function applyTheme(d) {
+      document.body.className = d ? 'dark' : 'light';
+      icon.className = d ? 'fas fa-moon' : 'fas fa-sun';
+    }
+    applyTheme(dark);
+    btn.addEventListener('click', () => { dark = !dark; applyTheme(dark); localStorage.setItem('theme', dark ? 'dark' : 'light'); });
 
-        function ResizeCanvas() {
-            Canvas.width = window.innerWidth;
-            Canvas.height = window.innerHeight;
-        }
+    // Player
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('play-btn');
+    const playIcon = document.getElementById('play-icon');
+    const progFill = document.getElementById('prog-fill');
+    const progBar = document.getElementById('prog-bar');
+    const timeCur = document.getElementById('time-cur');
+    const timeDur = document.getElementById('time-dur');
+    const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+    playBtn.addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
+    audio.addEventListener('play', () => { playIcon.className = 'fas fa-pause'; });
+    audio.addEventListener('pause', () => { playIcon.className = 'fas fa-play'; });
+    audio.addEventListener('timeupdate', () => {
+      const pct = (audio.currentTime / audio.duration) * 100 || 0;
+      progFill.style.width = pct + '%';
+      timeCur.textContent = fmt(audio.currentTime);
+    });
+    audio.addEventListener('loadedmetadata', () => { timeDur.textContent = fmt(audio.duration); });
+    progBar.addEventListener('click', e => {
+      const r = progBar.getBoundingClientRect();
+      audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
+    });
 
-        window.addEventListener('resize', ResizeCanvas);
-        ResizeCanvas();
+    // Title typer
+    const t = '@dripyked'; let ti = 0;
+    function typeTitle() {
+      if (ti <= t.length) { document.title = t.slice(0, ti++); setTimeout(typeTitle, 90); }
+    }
+    window.addEventListener('DOMContentLoaded', typeTitle);
+  </script>
+</body>
 
-        function RandomColor() {
-            return getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#a259ff';
-        }
-
-        function CreateParticles() {
-            Particles = [];
-            for (let I = 0; I < ParticleCount; I++) {
-                Particles.push({
-                    x: Math.random() * Canvas.width,
-                    y: Math.random() * Canvas.height,
-                    r: Math.random() * 1.8 + 1.2,
-                    dx: (Math.random() - 0.5) * 0.7,
-                    dy: (Math.random() - 0.5) * 0.7,
-                    color: RandomColor()
-                });
-            }
-        }
-        CreateParticles();
-
-        function DrawParticles() {
-            Ctx.clearRect(0, 0, Canvas.width, Canvas.height);
-            for (const P of Particles) {
-                Ctx.beginPath();
-                Ctx.arc(P.x, P.y, P.r, 0, 2 * Math.PI);
-                Ctx.fillStyle = P.color;
-                Ctx.globalAlpha = 0.5;
-                Ctx.fill();
-                Ctx.globalAlpha = 1;
-            }
-        }
-
-        function UpdateParticles() {
-            for (const P of Particles) {
-                P.x += P.dx;
-                P.y += P.dy;
-
-                if (P.x < 0 || P.x > Canvas.width) 
-                    P.dx *= -1;
-                
-
-                if (P.y < 0 || P.y > Canvas.height) 
-                    P.dy *= -1;
-                
-
-            }
-        }
-
-        function AnimateParticles() {
-            UpdateParticles();
-            DrawParticles();
-            requestAnimationFrame(AnimateParticles);
-        }
-        AnimateParticles();
-
-        window.addEventListener('resize', () => {
-            ResizeCanvas();
-            CreateParticles();
-        });
-
-        const Observer = new MutationObserver(() => {
-            for (const P of Particles) {
-                P.color = RandomColor();
-            }
-        });
-
-        Observer.observe(document.body, {
-            attributes: true,
-            attributeFilter: ['class']
-        });
-
-        function UpdateClock() {
-            const Clock = document.getElementById('clock');
-            const Now = new Date();
-            const H = String(Now.getHours()).padStart(2, '0');
-            const M = String(Now.getMinutes()).padStart(2, '0');
-            const S = String(Now.getSeconds()).padStart(2, '0');
-            Clock.textContent = `${H}:${M}:${S}`;
-        }
-        setInterval(UpdateClock, 1000);
-        UpdateClock();
-
-        const Audio = document.getElementById('audio');
-        const PlayPauseBtn = document.getElementById('play-pause');
-        const PlayPauseIcon = PlayPauseBtn.querySelector('i');
-        const ProgressContainer = document.getElementById('progress-container');
-        const Progress = document.getElementById('progress');
-        const AudioCurrent = document.getElementById('audio-current');
-        const AudioDuration = document.getElementById('audio-duration');
-        let IsPlaying = false;
-        function FormatTime(Secs) {
-            const Min = Math.floor(Secs / 60);
-            const Sec = Math.floor(Secs % 60);
-            return `${Min}:${
-                Sec.toString().padStart(2, '0')
-            }`;
-        }
-        PlayPauseBtn.addEventListener('click', () => {
-            if (Audio.paused) {
-                Audio.play();
-            } else {
-                Audio.pause();
-            }
-        });
-        Audio.addEventListener('play', () => {
-            IsPlaying = true;
-            PlayPauseIcon.classList.remove('fa-play');
-            PlayPauseIcon.classList.add('fa-pause');
-        });
-        Audio.addEventListener('pause', () => {
-            IsPlaying = false;
-            PlayPauseIcon.classList.remove('fa-pause');
-            PlayPauseIcon.classList.add('fa-play');
-        });
-        Audio.addEventListener('timeupdate', () => {
-            const Percent = (Audio.currentTime / Audio.duration) * 100;
-            Progress.style.width = Percent + '%';
-            AudioCurrent.textContent = FormatTime(Audio.currentTime);
-        });
-        Audio.addEventListener('loadedmetadata', () => {
-            AudioDuration.textContent = FormatTime(Audio.duration);
-        });
-        ProgressContainer.addEventListener('click', (E) => {
-            const Rect = ProgressContainer.getBoundingClientRect();
-            const X = E.clientX - Rect.left;
-            const Percent = X / Rect.width;
-            Audio.currentTime = Percent * Audio.duration;
-        });
-
-        const TitleText = '@dripyked';
-        let TitleIndex = 0;
-        function TypeTitle() {
-            if (TitleIndex <= TitleText.length) {
-                document.title = TitleText.slice(0, TitleIndex);
-                TitleIndex++;
-                setTimeout(TypeTitle, 100);
-            }
-        }
-        window.addEventListener('DOMContentLoaded', TypeTitle);
-    </script>
-</body></html>
+</html>
